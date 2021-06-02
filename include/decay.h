@@ -17,7 +17,7 @@
 #define EARTH_MASS_KG 5.98e24 // kg
 #define GRAVITATIONAL_CONSTANT 6.67e-11
 #define PI 3.1415926
-#define KARMAN_LINE_KM 100 // km
+#define KARMAN_LINE_M 100000 // km
 
 void decay_calculate(double satellite_mass, double satellite_area, double altitude_initial, double solar_radio_flux, double geomagnetic_a_index);
 

@@ -40,45 +40,45 @@
  * @param solar_radio_flux 
  * @param geomagnetic_a_index 
  */
-void decay_calculate(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index){
+void decay_calculate(double satellite_mass_kg, double satellite_area_m2, double altitude_km, double solar_radio_flux, double geomagnetic_a_index){
     double elapsed_time = 0.0;
-    double delta_time = 0.01; // In days... ???
-    double delta_time_sec = delta_time * 3600 * 24; // Now its in seconds... sigh. delta_time_sec =old= D9
-    double orbital_radius = EARTH_RADIUS + altitude * 1000;
-    double orbital_period = 2.0 * PI * sqrt(pow(orbital_radius, 3.0) / EARTH_MASS / GRAVITATIONAL_CONSTANT);
+    double delta_time_days = 0.01; // In days... ???
+    double delta_time_sec = delta_time_days * 3600 * 24; // Now its in seconds... sigh. delta_time_sec =old= D9
+    double orbital_radius_m = EARTH_RADIUS_M + altitude_km * 1000;
+    double orbital_period_sec = 2.0 * PI * sqrt(pow(orbital_radius_m, 3.0) / EARTH_MASS_KG / GRAVITATIONAL_CONSTANT);
 
     double SH = 0.0;
     double atmospheric_density = 0.0;
-    double delta_period = 0.0;
+    double delta_period_sec = 0.0;
 
     printf("TIME (days)\tHEIGHT (km)\tPERIOD (minutes)\n");
 
-    for (int i = 0; altitude >= KARMAN_LINE; i++) {
+    for (int i = 0; altitude_km >= KARMAN_LINE_KM; i++) {
         // Temperature(K) = 900 + 2.5 (F10.7 - 70) + 1.5 Ap
         // m = 27 - 0.012 (h - 200)     <-- Intermediate
         // H = Temp / m                 <-- Intermediate
         // density = 6x10^-10 * exp(-(h - 175) / H)
-        SH = (900 + 2.5 * (solar_radio_flux - 70) + 1.5 * geomagnetic_a_index) / (27 - 0.012 * (altitude - 200));
-        atmospheric_density = 6e-10 * exp(-(altitude - 175) / SH);
+        SH = (900 + 2.5 * (solar_radio_flux - 70) + 1.5 * geomagnetic_a_index) / (27 - 0.012 * (altitude_km - 200));
+        atmospheric_density = 6e-10 * exp(-(altitude_km - 175) / SH);
 
         // dP/dt = (-3)(pi)(a)(p)(Ae/m)
         // Ae = effective cross sectional area = A Cd = Area * Coeff. of Drag 
-        delta_period = 3 * PI * satellite_area / satellite_mass * orbital_radius * atmospheric_density * delta_time_sec;
+        delta_period_sec = 3 * PI * satellite_area_m2 / satellite_mass_kg * orbital_radius_m * atmospheric_density * delta_time_sec;
 
         // Print-outs went here.
         // TODO: Devise a more advanced print-out method.
         if (i % 10000 == 0) {
-            printf("%f\t%f\t%f\n", elapsed_time, altitude, orbital_period);
+            printf("%f\t%f\t%f\n", elapsed_time, altitude_km, orbital_period_sec);
         }
 
-        orbital_period -= delta_period;
-        elapsed_time += delta_time;
-        orbital_radius = pow((pow(orbital_period, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS / 4 / pow(PI, 2.0)), 0.33333);
-        altitude = (orbital_radius - EARTH_RADIUS) / 1000;
+        orbital_period_sec -= delta_period_sec;
+        elapsed_time += delta_time_days;
+        orbital_radius_m = pow((pow(orbital_period_sec, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS_KG / 4 / pow(PI, 2.0)), 0.33333);
+        altitude_km = (orbital_radius_m - EARTH_RADIUS_M) / 1000;
     }
 
     printf("Re-entry after %f days (%f years).\n", elapsed_time, elapsed_time / 365);
-    printf("%f %f %f\n", elapsed_time, altitude, orbital_period / 60);
+    printf("%f %f %f\n", elapsed_time, altitude_km, orbital_period_sec / 60);
 }
 
 void decay_calculate_old(double M, double A, double H, double F10, double Ap) {

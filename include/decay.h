@@ -13,12 +13,12 @@
  * 
  */
 
-#define EARTH_RADIUS_M 6378000 // m
-#define EARTH_MASS_KG 5.98e24 // kg
+#define EARTH_RADIUS 6378000 // Radius of the Earth in meters.
+#define EARTH_MASS 5.98e24 // Mass of the Earth in kilograms.
 #define GRAVITATIONAL_CONSTANT 6.67e-11
 #define PI 3.1415926
-#define KARMAN_LINE_M 100000 // km
+#define KARMAN_LINE 100000 // Minimum possible altitude in meters.
 
-void decay_calculate(double satellite_mass, double satellite_area, double altitude_initial, double solar_radio_flux, double geomagnetic_a_index);
+void decay_calculate(double satellite_mass, double satellite_area, double altitude_initial, double solar_radio_flux, double geomagnetic_a_index, int delta_time);
 
 void decay_calculate_old(double M, double A, double H, double F10, double Ap);

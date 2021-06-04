@@ -32,51 +32,51 @@
 // TODO: Calculations solved for other variables, ie find maximum average Ap and F10.7 given an altitude and desited time-of-flight.
 
 /**
- * @brief 
+ * @brief Calculates the amount of time it will take a satellite to descend to below the Karman Line due to air resistance.
  * 
- * @param satellite_mass 
- * @param satellite_area 
- * @param altitude_initial 
- * @param solar_radio_flux 
- * @param geomagnetic_a_index 
+ * All values should be in meters, seconds, or kilograms.
+ * 
+ * @param satellite_mass Mass of the satellite in kilograms.
+ * @param satellite_area Effective windward area of the satellite in square meters.
+ * @param altitude_initial The initial altitude of the satellite above the Earth's surface in kilometers.
+ * @param solar_radio_flux The average Solar Radio Flux during the satellite's lifetime.
+ * @param geomagnetic_a_index The average Geomagnetic A Index during the satellite's lifetime.
  */
-void decay_calculate(double satellite_mass_kg, double satellite_area_m2, double altitude_km, double solar_radio_flux, double geomagnetic_a_index)
+void decay_calculate(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index, int delta_time)
 {
-    double elapsed_time_days = 0.0;
-    double delta_time_days = 0.01;
-    double delta_time_sec = delta_time_days * 3600 * 24;
-    double altitude_m = altitude_km * 1000;
-    double orbital_radius_m = EARTH_RADIUS_M + altitude_m;
-    double orbital_period_sec = 2.0 * PI * sqrt(pow(orbital_radius_m, 3.0) / EARTH_MASS_KG / GRAVITATIONAL_CONSTANT);
+    altitude *= 1000; // Convert altitude (km) to altitude (m).
+    //const int delta_time = 864; // Change in time per iteration measured in whole seconds.
+    int elapsed_time = 0; // Elapsed time measured in whole seconds.
+    double orbital_radius = EARTH_RADIUS + altitude; // Orbital radius measured in meters.
+    double orbital_period = 2.0 * PI * sqrt(pow(orbital_radius, 3.0) / EARTH_MASS / GRAVITATIONAL_CONSTANT); // Orbital period measured in fractional seconds.
 
-    double SH = 0.0;
-    double atmospheric_density = 0.0;
-    double delta_period_sec = 0.0;
+    double SH = 0.0; // A placeholder calculation for atmospheric_density.
+    double atmospheric_density = 0.0; // Atmospheric density at the satellite's current altitude.
+    double delta_period = 0.0; // Change in orbital period from previous iteration.
 
-    printf("TIME (days)\tHEIGHT (km)\tPERIOD (minutes)\n");
+    printf("TIME (days)\t\tHEIGHT (km)\t\tPERIOD (minutes)\n");
 
-    for (int i = 0; altitude_m >= KARMAN_LINE_M; i++)
+    while (altitude >= KARMAN_LINE)
     {
-        SH = (900 + 2.5 * (solar_radio_flux - 70) + 1.5 * geomagnetic_a_index) / (27 - 0.012 * ((altitude_m / 1000) - 200));
-        atmospheric_density = 6e-10 * exp(-((altitude_m / 1000) - 175) / SH);
+        SH = (900 + 2.5 * (solar_radio_flux - 70) + 1.5 * geomagnetic_a_index) / (27 - 0.012 * ((altitude / 1000) - 200));
+        atmospheric_density = 6e-10 * exp(-((altitude / 1000) - 175) / SH);
 
-        delta_period_sec = 3 * PI * satellite_area_m2 / satellite_mass_kg * orbital_radius_m * atmospheric_density * delta_time_sec;
+        delta_period = 3 * PI * satellite_area / satellite_mass * orbital_radius * atmospheric_density * (double)delta_time;
 
-        // Print-outs went here.
         // TODO: Devise a more advanced print-out method.
-        if (i % 10000 == 0)
+        if (elapsed_time % 86400 == 0)
         {
-            printf("%f\t%f\t%f\n", elapsed_time_days, altitude_m / 1000, orbital_period_sec);
+            printf("%d\t\t%f\t\t%f\n", elapsed_time, altitude / 1000, orbital_period);
         }
 
-        orbital_period_sec -= delta_period_sec;
-        elapsed_time_days += delta_time_days;
-        orbital_radius_m = pow((pow(orbital_period_sec, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS_KG / 4 / pow(PI, 2.0)), 0.33333);
-        altitude_m = orbital_radius_m - EARTH_RADIUS_M;
+        orbital_period -= delta_period;
+        elapsed_time += delta_time;
+        orbital_radius = pow((pow(orbital_period, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS / 4 / pow(PI, 2.0)), 0.33333);
+        altitude = orbital_radius - EARTH_RADIUS;
     }
 
-    printf("Re-entry after %f days (%f years).\n", elapsed_time_days, elapsed_time_days / 365);
-    printf("%f %f %f\n", elapsed_time_days, altitude_m / 1000, orbital_period_sec / 60);
+    printf("Re-entry after %f days (%f years).\n", (double)elapsed_time / (3600 * 24), (double)elapsed_time / (3600 * 24 * 365));
+    printf("%d %f %f\n", elapsed_time, altitude / 1000, orbital_period);
 }
 
 void decay_calculate_old(double M, double A, double H, double F10, double Ap)

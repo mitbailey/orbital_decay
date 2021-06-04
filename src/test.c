@@ -9,6 +9,7 @@
  * 
  */
 
+#include <stdlib.h>
 #include "decay.h"
 
 int main (void) {

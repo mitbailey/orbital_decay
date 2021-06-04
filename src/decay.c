@@ -155,6 +155,11 @@ int decay_calculate_suppressed(double satellite_mass, double satellite_area, dou
 
         delta_period = 3 * PI * satellite_area / satellite_mass * orbital_radius * atmospheric_density * (double)delta_time;
 
+        if (elapsed_time >= 1.577e9) {
+            printf("Satellite lifetime exceeds 50 years.\n");
+            return -1;
+        }
+
         orbital_period -= delta_period;
         elapsed_time += delta_time;
         orbital_radius = pow((pow(orbital_period, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS / 4 / pow(PI, 2.0)), 0.33333);
@@ -189,6 +194,11 @@ int decay_calculate(double satellite_mass, double satellite_area, double altitud
         if (elapsed_time % (7 * 86400) == 0) // 86400 sec = 1 day
         {
             printf("%d\t\t%f\t\t%f\n", elapsed_time / 86400, altitude / 1000, orbital_period);
+
+            if (elapsed_time >= 1.577e9) {
+                printf("Satellite lifetime exceeds 50 years.\n");
+                return -1;
+            }
         }
 
         orbital_period -= delta_period;

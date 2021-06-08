@@ -18,7 +18,9 @@ int main (void) {
     //decay_calculate_old(3.0, 0.03, 465, 70, 10);
 
     decay_calculate(3.0, 0.03, 465, 70, 10);
+    printf("\n\n");
     decay_max_avg_srf(3.0, 0.03, 465, 10, 3000);
+    printf("\n\n");
     decay_max_avg_geo(3.0, 0.03, 465, 70, 3000);
 
     return 1;

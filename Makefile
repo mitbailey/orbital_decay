@@ -3,13 +3,13 @@ RM = rm -vf
 
 EDCFLAGS := -O2 -Wall -I include/ $(CFLAGS)
 EDLDFLAGS := -lpthread -lm $(LDFLAGS)
-TARGET := reentry
+TARGET := decay
 COBJ = src/decay.o
 
 all: $(TARGET)
 
-reentry: src/ui.o $(COBJ)
-	$(CC) $(EDCFLAGS) $< $(COBJ) -o reentry.out $(EDLDFLAGS)
+decay: src/ui.o $(COBJ)
+	$(CC) $(EDCFLAGS) $< $(COBJ) -o decay.out $(EDLDFLAGS)
 
 %.o: %.c
 	$(CC) $(EDCFLAGS) -o $@ -c $<

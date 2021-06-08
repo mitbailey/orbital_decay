@@ -1,7 +1,7 @@
 /**
  * @file decay.c
  * @author Mit Bailey (mitbailey99@gmail.com)
- * @brief 
+ * @brief Orbital Decay Simulation Program
  * @version 0.2
  * @date 2021.06.01
  * 

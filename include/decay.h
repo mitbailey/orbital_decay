@@ -33,19 +33,19 @@
  * @param satellite_area Effective windward area of the satellite in square meters.
  * @param altitude The initial altitude of the satellite above the Earth's surface in kilometers.
  * @param geomagnetic_a_index The average Geomagnetic A Index during the satellite's lifetime.
- * @param mission_time The desired mission duration.
+ * @param mission_time The desired mission duration in days.
  * @return double Maximum average Solar Radio Flux.
  */
 double decay_max_avg_srf(double satellite_mass, double satellite_area, double altitude, double geomagnetic_a_index, int mission_time);
 
 /**
- * @brief 
+ * @brief Calculates the maximum average Geomagnetic A Index the given satellite can endure while maintaining a desired time of flight.
  * 
  * @param satellite_mass Mass of the satellite in kilograms.
  * @param satellite_area Effective windward area of the satellite in square meters.
  * @param altitude The initial altitude of the satellite above the Earth's surface in kilometers.
  * @param solar_radio_flux The average Solar Radio Flux during the satellite's lifetime.
- * @param mission_time The desired mission duration.
+ * @param mission_time The desired mission duration in days.
  * @return double Maximum average Geomagnetic A Index.
  */
 double decay_max_avg_geo(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, int mission_time);

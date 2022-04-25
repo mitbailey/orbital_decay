@@ -2,33 +2,17 @@
  * @file decay.c
  * @author Mit Bailey (mitbailey99@gmail.com)
  * @brief Orbital Decay Simulation Program
- * @version 0.2
+ * @version See Git tags for version information.
  * @date 2021.06.01
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
-#include <stdio.h>
+#include <meb_print.h>
 #include <math.h>
 #include <stdbool.h>
 #include "decay.h"
-
-// Old      New
-// dT       delta_time
-// D9       delta_time_sec
-// A        satellite_area
-// H        altitude
-// H1       Print height increment? altitude_1
-// H2       Print height? altitude_2
-// R        orbital_radius
-// Ap       geo_a_index
-// F10      solar_r_flux
-// M        satellite_mass
-// P        orbital_period (seconds)
-// Pm       orbital_period_mins (minutes)
-// dP       delta_period
-// T        elapsed_time
 
 double decay_max_avg_srf(double satellite_mass, double satellite_area, double altitude, double geomagnetic_a_index, int mission_time)
 {
@@ -41,15 +25,13 @@ double decay_max_avg_srf(double satellite_mass, double satellite_area, double al
     double increment = 1;
     bool was_less_than_desired = true;
 
-    printf("Working...\n");
-    fflush(stdout);
+    bprintlf("Working...");
 
     for (int attempt = 0; attempt < 100; attempt++)
     {
         time_of_flight = decay_calculate_suppressed(satellite_mass, satellite_area, altitude, solar_radio_flux, geomagnetic_a_index);
 
-        printf("Attempt %d: Descrepancy of %d seconds with SRF of %f\n", attempt, time_of_flight - mission_time, solar_radio_flux);
-        fflush(stdout);
+        bprintlf("Attempt %d: Descrepancy of %d seconds with SRF of %f.", attempt, time_of_flight - mission_time, solar_radio_flux);
 
         if (time_of_flight < mission_time)
         {
@@ -77,8 +59,8 @@ double decay_max_avg_srf(double satellite_mass, double satellite_area, double al
         }
     }
 
-    printf("Desired mission time: %d seconds, %d days.\n", mission_time, mission_time / 86400);
-    printf("Time of flight found to be %d with a F10.7 index Solar Radio Flux of %f and a Geomagnetic A Index of %f (%d second descrepancy).\n", time_of_flight, solar_radio_flux, geomagnetic_a_index, time_of_flight - mission_time);
+    bprintlf("Desired mission time: %d seconds, %d days.", mission_time, mission_time / 86400);
+    bprintlf("Time of flight found to be %d with a F10.7 index Solar Radio Flux of %f and a Geomagnetic A Index of %f (%d second descrepancy).", time_of_flight, solar_radio_flux, geomagnetic_a_index, time_of_flight - mission_time);
 
     return solar_radio_flux;
 }
@@ -94,15 +76,13 @@ double decay_max_avg_geo(double satellite_mass, double satellite_area, double al
     double increment = 1;
     bool was_less_than_desired = true;
 
-    printf("Working...\n");
-    fflush(stdout);
+    bprintlf("Working...");
 
     for (int attempt = 0; attempt < 100; attempt++)
     {
         time_of_flight = decay_calculate_suppressed(satellite_mass, satellite_area, altitude, solar_radio_flux, geomagnetic_a_index);
 
-        printf("Attempt %d: Descrepancy of %d seconds with GEO of %f\n", attempt, time_of_flight - mission_time, geomagnetic_a_index);
-        fflush(stdout);
+        bprintlf("Attempt %d: Descrepancy of %d seconds with GEO of %f", attempt, time_of_flight - mission_time, geomagnetic_a_index);
 
         if (time_of_flight < mission_time)
         {
@@ -130,8 +110,8 @@ double decay_max_avg_geo(double satellite_mass, double satellite_area, double al
         }
     }
 
-    printf("Desired mission time: %d seconds, %d days.\n", mission_time, mission_time / 86400);
-    printf("Time of flight found to be %d with a F10.7 index Solar Radio Flux of %f and a Geomagnetic A Index of %f (%d second descrepancy).\n", time_of_flight, solar_radio_flux, geomagnetic_a_index, time_of_flight - mission_time);
+    bprintlf("Desired mission time: %d seconds, %d days.", mission_time, mission_time / 86400);
+    bprintlf("Time of flight found to be %d with a F10.7 index Solar Radio Flux of %f and a Geomagnetic A Index of %f (%d second descrepancy).", time_of_flight, solar_radio_flux, geomagnetic_a_index, time_of_flight - mission_time);
 
     return solar_radio_flux;
 }
@@ -155,8 +135,9 @@ int decay_calculate_suppressed(double satellite_mass, double satellite_area, dou
 
         delta_period = 3 * PI * satellite_area / satellite_mass * orbital_radius * atmospheric_density * (double)delta_time;
 
-        if (elapsed_time >= 1.577e9) {
-            printf("Satellite lifetime exceeds 50 years.\n");
+        if (elapsed_time >= 1.577e9)
+        {
+            bprintlf("Satellite lifetime exceeds 50 years.");
             return -1;
         }
 
@@ -181,7 +162,7 @@ int decay_calculate(double satellite_mass, double satellite_area, double altitud
     double atmospheric_density = 0.0; // Atmospheric density at the satellite's current altitude.
     double delta_period = 0.0;        // Change in orbital period from previous iteration.
 
-    printf("TIME (days)\tHEIGHT (km)\t\tPERIOD (minutes)\n");
+    bprintlf("TIME (days)\tHEIGHT (km)\t\tPERIOD (minutes)");
 
     while (altitude >= KARMAN_LINE)
     {
@@ -193,10 +174,11 @@ int decay_calculate(double satellite_mass, double satellite_area, double altitud
         // TODO: Devise a more advanced print-out method.
         if (elapsed_time % (7 * 86400) == 0) // 86400 sec = 1 day
         {
-            printf("%d\t\t%f\t\t%f\n", elapsed_time / 86400, altitude / 1000, orbital_period);
+            bprintlf("%d\t\t%f\t\t%f", elapsed_time / 86400, altitude / 1000, orbital_period);
 
-            if (elapsed_time >= 1.577e9) {
-                printf("Satellite lifetime exceeds 50 years.\n");
+            if (elapsed_time >= 1.577e9)
+            {
+                bprintlf("Satellite lifetime exceeds 50 years.");
                 return -1;
             }
         }
@@ -208,38 +190,9 @@ int decay_calculate(double satellite_mass, double satellite_area, double altitud
     }
 
     // Final print-out.
-    printf("%d\t\t%f\t\t%f\n\n", elapsed_time / 86400, altitude / 1000, orbital_period);
+    bprintlf("%d\t\t%f\t\t%f\n", elapsed_time / 86400, altitude / 1000, orbital_period);
 
-    printf("Re-entry after %f days (%f years).\n", (double)elapsed_time / (3600 * 24), (double)elapsed_time / (3600 * 24 * 365));
+    bprintlf("Re-entry after %f days (%f years).", (double)elapsed_time / (3600 * 24), (double)elapsed_time / (3600 * 24 * 365));
 
     return elapsed_time;
-}
-
-void decay_calculate_old(double M, double A, double H, double F10, double Ap)
-{
-    double Re = 6378000;
-    double Me = 5.98e24;
-    double G = 6.67e-11;
-    double pi = 3.1416;
-
-    double T = 0;
-    double dT = 0.1;
-    double D9 = dT * 3600 * 24;
-    double R = Re + H * 1000;
-    double P = 2 * pi * sqrt(R * R * R / Me / G);
-
-    while (H >= 180)
-    {
-        double SH = (900 + 2.5 * (F10 - 70) + 1.5 * Ap) / (27 - 0.012 * (H - 200));
-        double DN = 6e-10 * exp(-(H - 175) / SH);
-        double dP = 3 * pi * A / M * R * DN * D9;
-
-        P = P - dP;
-        T = T + dT;
-        R = pow((G * Me * P * P / 4 / pi / pi), 0.33333);
-        H = (R - Re) / 1000;
-    }
-
-    printf("Re-entry after %f days (%f years).\n", T, T / 365);
-    printf("%f %f %f\n", T, H, P / 60);
 }

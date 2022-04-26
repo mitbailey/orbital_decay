@@ -40,17 +40,11 @@ Open Terminal in the orbital_decay/ directory and execute
 `make`  
 
 ## Use Instructions
-### Linux
-1. Run the following commands in a Terminal from within the repository directory:  
-```
-$ make
-$ ./decay.out
-```
-
-2. Follow the on-screen prompts. 
-
 ### Windows
-The Windows executable can be downloaded from the Releases (https://github.com/mitbailey/orbital_decay/releases) and run. Alternatively, the code can be compiled on Windows using Mingw-w64 and the instructions above (in the "Compilation" section).
+After compilation or having downloaded the executable from the Releases page (https://github.com/mitbailey/orbital_decay/releases), either double-click `decay.exe` or run `decay.exe` in a CMD window opened within the repository directory. Then, follow the on-screen prompts.  
+
+### Linux
+After compilation, run `./decay.out` in a Terminal from within the repository directory. Then, follow the on-screen prompts.
 
 ## Finding Data
 The program requires knowledge of the solar 10.7 cm radio flux intensity (F10.7 scale) and the geomagnetic field intensity (A Index) during the mission. Data for both of these can be found at the links below:

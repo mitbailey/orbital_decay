@@ -1,0 +1,8 @@
+@ECHO OFF
+SET CC=gcc
+SET COBJS=src/decay.c src/ui.c
+SET EDCFLAGS=-I ./include/ -Wall %CFLAGS%
+SET EDLDFLAGS=%LDFLAGS%
+SET TARGET=decay.exe
+
+CMD /c "%CC% %EDCFLAGS% %COBJS% -o %TARGET% %EDLDFLAGS%"

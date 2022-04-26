@@ -1,15 +1,13 @@
 CC = gcc
+COBJS = src/decay.o src/ui.o
+EDCFLAGS = -I ./ -I ./include/ -Wall -pthread $(CFLAGS)
+EDLDFLAGS = -lpthread -lm $(LDFLAGS)
+TARGET = decay.out
+
 RM = rm -vf
 
-EDCFLAGS := -O2 -Wall -I include/ $(CFLAGS)
-EDLDFLAGS := -lpthread -lm $(LDFLAGS)
-TARGET := decay
-COBJ = src/decay.o
-
-all: $(TARGET)
-
-decay: src/ui.o $(COBJ)
-	$(CC) $(EDCFLAGS) $< $(COBJ) -o decay.out $(EDLDFLAGS)
+all: $(COBJS)
+	$(CC) $(EDCFLAGS) $(COBJS) -o $(TARGET) $(EDLDFLAGS)
 
 %.o: %.c
 	$(CC) $(EDCFLAGS) -o $@ -c $<

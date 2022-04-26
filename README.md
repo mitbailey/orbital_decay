@@ -12,7 +12,7 @@ $ ./decay.out
 2. Follow the on-screen prompts. 
 
 ### Windows
-The program is not currently available to run on Windows. However, WSL2 can be used to run the program as if using Linux.
+The Windows executable can be downloaded from the Releases (https://github.com/mitbailey/orbital_decay/releases) and run. Alternatively, the code can be compiled on Windows using Mingw-w64 (view the README.md from the following repository for information on how to compile the program for Windows: https://github.com/mitbailey/win_app).
 
 ## Finding Data
 The program requires knowledge of the solar 10.7 cm radio flux intensity (F10.7 scale) and the geomagnetic field intensity (A Index) during the mission. Data for both of these can be found at the links below:

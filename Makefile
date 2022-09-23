@@ -18,3 +18,6 @@ clean:
 	$(RM) *.out
 	$(RM) src/*.o
 	$(RM) *.tmp
+
+dataless:
+	$(RM) data.csv

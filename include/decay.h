@@ -19,6 +19,8 @@
  *
  */
 
+#include <stdbool.h>
+
 #define EARTH_RADIUS 6378000 // Radius of the Earth in meters.
 #define EARTH_MASS 5.98e24   // Mass of the Earth in kilograms.
 #define GRAVITATIONAL_CONSTANT 6.67e-11
@@ -61,9 +63,12 @@ double decay_max_avg_geo(double satellite_mass, double satellite_area, double al
  * @param altitude The initial altitude of the satellite above the Earth's surface in kilometers.
  * @param solar_radio_flux The average Solar Radio Flux during the satellite's lifetime.
  * @param geomagnetic_a_index The average Geomagnetic A Index during the satellite's lifetime.
+ * @param save_to_csv True - saves the run data in a .csv file; False - Does not.
+ * @param runs Number of times to run the calculation.
+ * @param run_increment Delta-altitude per run (km).
  * @return int Elapsed time in seconds before falling below the Karman Line.
  */
-int decay_calculate(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index);
+int decay_calculate(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index, bool save_to_csv, int runs, float run_increment);
 
 // Decay calculate without prints, used by decay_max_avg_activity(...).
 int decay_calculate_suppressed(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index);

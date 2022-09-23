@@ -12,6 +12,7 @@
 #include <meb_print.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "decay.h"
 
 double decay_max_avg_srf(double satellite_mass, double satellite_area, double altitude, double geomagnetic_a_index, int mission_time)
@@ -150,10 +151,12 @@ int decay_calculate_suppressed(double satellite_mass, double satellite_area, dou
     return elapsed_time;
 }
 
-int decay_calculate(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index)
+int decay_calculate(double satellite_mass, double satellite_area, double altitude, double solar_radio_flux, double geomagnetic_a_index, bool save_to_csv, int runs, float run_increment)
 {
-    altitude *= 1000;                                                                                        // Convert altitude (km) to altitude (m).
-    int delta_time = TEMPORAL_RESOLUTION;                                                                    // Change in time per iteration measured in whole seconds.
+    altitude *= 1000;     
+    int orig_altitude = altitude;
+    run_increment *= 1000;          
+                                                                             // Convert altitude (km) to altitude (m).
     int elapsed_time = 0;                                                                                    // Elapsed time measured in whole seconds.
     double orbital_radius = EARTH_RADIUS + altitude;                                                         // Orbital radius measured in meters.
     double orbital_period = 2.0 * PI * sqrt(pow(orbital_radius, 3.0) / EARTH_MASS / GRAVITATIONAL_CONSTANT); // Orbital period measured in fractional seconds.
@@ -162,37 +165,84 @@ int decay_calculate(double satellite_mass, double satellite_area, double altitud
     double atmospheric_density = 0.0; // Atmospheric density at the satellite's current altitude.
     double delta_period = 0.0;        // Change in orbital period from previous iteration.
 
-    bprintlf("TIME (days)\tHEIGHT (km)\t\tPERIOD (minutes)");
-
-    while (altitude >= KARMAN_LINE)
+    FILE* fp = NULL;
+    if (save_to_csv)
     {
-        SH = (900 + 2.5 * (solar_radio_flux - 70) + 1.5 * geomagnetic_a_index) / (27 - 0.012 * ((altitude / 1000) - 200));
-        atmospheric_density = 6e-10 * exp(-((altitude / 1000) - 175) / SH);
-
-        delta_period = 3 * PI * satellite_area / satellite_mass * orbital_radius * atmospheric_density * (double)delta_time;
-
-        // TODO: Devise a more advanced print-out method.
-        if (elapsed_time % (7 * 86400) == 0) // 86400 sec = 1 day
+        fp = fopen("data.csv", "a");
+        if (fp == NULL)
         {
-            bprintlf("%d\t\t%f\t\t%f", elapsed_time / 86400, altitude / 1000, orbital_period);
-
-            if (elapsed_time >= 1.577e9)
-            {
-                bprintlf("Satellite lifetime exceeds 50 years.");
-                return -1;
-            }
+            save_to_csv = false;
         }
-
-        orbital_period -= delta_period;
-        elapsed_time += delta_time;
-        orbital_radius = pow((pow(orbital_period, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS / 4 / pow(PI, 2.0)), 0.33333);
-        altitude = orbital_radius - EARTH_RADIUS;
     }
 
-    // Final print-out.
-    bprintlf("%d\t\t%f\t\t%f\n", elapsed_time / 86400, altitude / 1000, orbital_period);
+    bprintlf("\nBEGIN CALCULATION");
+    if (save_to_csv) {fprintf(fp, "BEGIN CALCULATION\n");}
+    for (int i = 1; i <= runs; i++)
+    {
+        bprintlf("RUN %d/%d", i, runs);
+        bprintlf("TIME (days)\tHEIGHT (km)\t\tPERIOD (minutes)");
+        if (save_to_csv) {fprintf(fp, "\nRUN %d/%d\n", i, runs);}
+        if (save_to_csv) {fprintf(fp, "TIME (days), HEIGHT (km), PERIOD (minutes)\n");}
 
-    bprintlf("Re-entry after %f days (%f years).", (double)elapsed_time / (3600 * 24), (double)elapsed_time / (3600 * 24 * 365));
+        while (altitude >= KARMAN_LINE)
+        {
+            SH = (900 + 2.5 * (solar_radio_flux - 70) + 1.5 * geomagnetic_a_index) / (27 - 0.012 * ((altitude / 1000) - 200));
+            atmospheric_density = 6e-10 * exp(-((altitude / 1000) - 175) / SH);
+
+            delta_period = 3 * PI * satellite_area / satellite_mass * orbital_radius * atmospheric_density * (double)TEMPORAL_RESOLUTION;
+
+            // TODO: Devise a more advanced print-out method.
+            if (elapsed_time % (7 * 86400) == 0) // 86400 sec = 1 day
+            {
+                bprintlf("%d\t\t%f\t\t%f", elapsed_time / 86400, altitude / 1000, orbital_period);
+                if (save_to_csv) {fprintf(fp, "%d, %f, %f\n", elapsed_time / 86400, altitude / 1000, orbital_period);}
+
+                if (elapsed_time >= 1.577e9)
+                {
+                    bprintlf("Satellite lifetime exceeds 50 years.");
+                    if (save_to_csv) {fprintf(fp, "Satellite lifetime exceeds 50 years.\n");}
+                    return -1;
+                }
+            }
+
+            orbital_period -= delta_period;
+            elapsed_time += TEMPORAL_RESOLUTION;
+            orbital_radius = pow((pow(orbital_period, 2.0) * GRAVITATIONAL_CONSTANT * EARTH_MASS / 4 / pow(PI, 2.0)), 0.33333);
+            altitude = orbital_radius - EARTH_RADIUS;
+        }
+
+        // Final print-out.
+        bprintlf("%d\t\t%f\t\t%f\n", elapsed_time / 86400, altitude / 1000, orbital_period);
+        if (save_to_csv) {fprintf(fp, "%d, %f, %f\n", elapsed_time / 86400, altitude / 1000, orbital_period);}
+
+        bprintlf("Re-entry after %f days (%f years).\n", (double)elapsed_time / (3600 * 24), (double)elapsed_time / (3600 * 24 * 365));
+        if (save_to_csv) {fprintf(fp, "\nRe-entry after %f days (%f years).\n\n", (double)elapsed_time / (3600 * 24), (double)elapsed_time / (3600 * 24 * 365));}
+
+        // Reset everything for next run.
+        altitude = orig_altitude + (i * run_increment);
+        elapsed_time = 0;                                                                                  
+        orbital_radius = EARTH_RADIUS + altitude;                                                        
+        orbital_period = 2.0 * PI * sqrt(pow(orbital_radius, 3.0) / EARTH_MASS / GRAVITATIONAL_CONSTANT);
+        SH = 0.0;
+        atmospheric_density = 0.0;
+        delta_period = 0.0;
+    }
+
+    bprintlf("END CALCULATION");
+    if (save_to_csv) {fprintf(fp, "END CALCULATION\n");}
+    bprintlf("------------------------------------------");
+    if (save_to_csv) {fprintf(fp, "------------------------------------------\n\n");}
+
+    if (fp != NULL)
+    {
+        fclose(fp);
+    }
 
     return elapsed_time;
 }
+
+// TODO: Stop the UI from backing out to calculation selection after performing a calculation.
+// TODO: Add 'Back', 'Exit', and 'Help' options.
+// TODO: Add the ability to print results to files.
+// TODO: Add the ability to insert a range of values. For instance, reentry over a range of altitudes w/ some increment.
+// int decay_calculate_to_file()
